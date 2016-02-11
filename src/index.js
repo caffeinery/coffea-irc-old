@@ -1,30 +1,34 @@
 import {forward} from 'coffea'
 import {parse} from 'coffea-irc-parser'
-const stream = require('stream')
 
-const defaults = {
-  host: 'chat.freenode.net',
-  port: 6697,
-  ssl: true,
-  ssl_allow_invalid: false
-}
+import {defaults} from './constants'
 
-/**
- * Example configuration passed through to this function:
- *
- * {
- *   "host": "chat.freenode.net",
- *   "port": 6697,
- *   "ssl": true,
- *   "ssl_allow_invalid": false
- * }
- */
-export default function irc (config, dispatch) {
-  // Merge the configuration with the default configuration, initiate connection.
-  Object.assign(config, defaults);
-  connection(config, dispatch);
+export default function irc(config, dispatch) {
+  const send = event => {
+    return;
+  }
 
-  return forward({
-    'message': null // No handler defined for 'message' (yet)
-  })
+  const connect = (config) => {
+    Object.assign(config, defaults);
+    return require(config.ssl ? 'tls' : 'net').connect({host: config.host, port: config.port})
+  }
+
+  let connection = connect(config)
+
+  const onData = (data) => {
+    let parsed = parse(data)
+
+    if (!data instanceof Error) {
+      return propagate(parsed_message(parsed));
+    }
+
+    // TODO: Warn the user.
+  }
+  
+  connection.setEncoding('utf8')
+  connection.on('message', onData)
+  // TODO: Make the core be aware of this disconnection.
+  // connection.on('end', onEnd)
+
+  return forward({}) // Nothing to see here, yet.
 }
