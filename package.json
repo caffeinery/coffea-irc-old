@@ -1,0 +1,7 @@
+{
+  "name": "coffea-irc",
+  "version": "0.1.0",
+  "dependencies": {
+    "coffea-irc-parser": "^0.1.0"
+  }
+}
